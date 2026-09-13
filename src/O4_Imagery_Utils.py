@@ -675,7 +675,7 @@ def http_request_to_image(width,height,url,request_headers,http_session):
             if not check_tms_response:
                 break
             # trying a new session ? 
-            http_session=requests.Session()
+            http_session=requests.Session(); http_session.headers.update({'User-Agent':'Ortho4XP/1.30 (+https://github.com/wonmor/Ortho4XP_FSX_P3D)'})
             time.sleep(2)
             if UI.red_flag: return (0,'Stopped')
             tentative_request+=1
@@ -803,7 +803,7 @@ def build_texture_from_tilbox(tilbox,zoomlevel,provider,progress=None):
     width=height=provider['tile_size']
     big_image=Image.new('RGB',(width*parts_x,height*parts_y)) 
     # we set-up the queue of downloads
-    http_session=requests.Session() 
+    http_session=requests.Session(); http_session.headers.update({'User-Agent':'Ortho4XP/1.30 (+https://github.com/wonmor/Ortho4XP_FSX_P3D)'})
     download_queue=queue.Queue()
     for monty in range(0,parts_y):
         for montx in range(0,parts_x):
@@ -888,7 +888,7 @@ def build_texture_from_bbox_and_size(t_bbox,t_epsg,t_size,provider):
         else:
             subt_size=None
     big_image=Image.new('RGB',(width*parts_x,height*parts_y)) 
-    http_session=requests.Session()
+    http_session=requests.Session(); http_session.headers.update({'User-Agent':'Ortho4XP/1.30 (+https://github.com/wonmor/Ortho4XP_FSX_P3D)'})
     download_queue=queue.Queue()
     for monty in range(0,parts_y):
         for montx in range(0,parts_x):

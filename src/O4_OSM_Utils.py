@@ -349,6 +349,7 @@ def get_overpass_data(query,bbox,server_code=None):
     tentative=1
     while True:
         s=requests.Session()
+        s.headers.update({'User-Agent':'Ortho4XP/1.30 (+https://github.com/wonmor/Ortho4XP_FSX_P3D)'})
         true_server_code = server_code
         if not server_code:
            true_server_code = random.choice(list(overpass_servers.keys())) if overpass_server_choice=='random' else overpass_server_choice

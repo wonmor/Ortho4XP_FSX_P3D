@@ -462,7 +462,7 @@ def ensure_elevation(source,lat,lon,verbose=True):
                 
 ##############################################################################
 def http_request(url,source,verbose=False):
-    s=requests.Session()
+    s=requests.Session(); s.headers.update({'User-Agent':'Ortho4XP/1.30 (+https://github.com/wonmor/Ortho4XP_FSX_P3D)'})
     tentative=0
     while True: 
         try:
