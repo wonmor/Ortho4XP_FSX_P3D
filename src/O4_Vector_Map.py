@@ -305,7 +305,7 @@ def include_sea(vector_map,tile):
         sea_area=VECT.ensure_MultiPolygon(VECT.coastline_to_MultiPolygon(coastline,tile.lat,tile.lon,custom_source)) 
         if sea_area.geoms: UI.vprint(1,"      Found ",len(sea_area.geoms),"contiguous patch(es).")
         for polygon in sea_area.geoms:
-            seed=numpy.array(polygon.representative_point()) 
+            seed=numpy.array(polygon.representative_point().coords[0]) 
             if 'SEA' in vector_map.seeds:
                 vector_map.seeds['SEA'].append(seed)
             else:
@@ -509,7 +509,7 @@ def include_patches(vector_map,tile):
                     if pol.is_valid and pol.area:
                         patches_area=patches_area.union(pol)
                         vector_map.insert_way(numpy.hstack([way,alti_way]),'INTERP_ALT',check=True)
-                        seed=numpy.array(pol.representative_point())
+                        seed=numpy.array(pol.representative_point().coords[0])
                         if 'INTERP_ALT' in vector_map.seeds:
                             vector_map.seeds['INTERP_ALT'].append(seed)
                         else:
