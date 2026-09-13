@@ -25,12 +25,16 @@ Must be run from (or live in) the Ortho4XP folder, next to Ortho4XP_v130.py.
 """
 import argparse
 import csv
-import io
 import math
 import os
 import re
 import sys
 import xml.etree.ElementTree as ET
+
+# numpy's OpenBLAS reserves a buffer per logical CPU at import; on a 32-thread machine under
+# memory pressure that fails with "OpenBLAS error: Memory allocation still failed". Ortho4XP
+# does no heavy BLAS work, so cap it before numpy is imported.
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "2")
 
 NM_PER_DEG = 60.0
 EARTH_R_NM = 3440.065
