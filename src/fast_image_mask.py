@@ -152,7 +152,7 @@ C = MasksConfig
 def _load_rgb(img_name):
     """Return (H, W, 3) int32 array of the image."""
     with Image.open(img_name) as im:
-        return np.asarray(im.convert('RGB'), dtype=np.int32)
+        return np.asarray(im.convert('RGB'), dtype=np.int16)
 
 
 def _load_water_mask(mask_img_path, shape_hw):
@@ -172,7 +172,7 @@ def _load_water_mask(mask_img_path, shape_hw):
 
 def _trunc(x):
     """C-style (int32_t)(float) conversion: truncation toward zero."""
-    return np.trunc(x).astype(np.int32)
+    return np.trunc(x).astype(np.int16)
 
 
 def _rand(shape):
