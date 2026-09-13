@@ -61,20 +61,21 @@ Ortho4XP does **not** need to run at the same time as the sim. It is an offline 
 it writes `.bgl` scenery files, you copy those into the sim, and you close Ortho4XP. The sim reads the files by itself.
 
 1. **Install the Prepar3D SDK.** It is a separate download from the same Lockheed Martin download page where you got
-   Prepar3D (log in, look for "Prepar3D vX SDK"). Pick the SDK that matches your sim version. After installing, find
-   `resample.exe`, typically at:
+   Prepar3D (log in, look for "Prepar3D vX SDK"). Pick the SDK that matches your sim version. It can be installed
+   on any drive. After installing, find `resample.exe`. For the v5.4 SDK it is at:
 
    ```
-   C:\Program Files\Lockheed Martin\Prepar3D v5 SDK <version>\Environment Kit\Terrain SDK\resample.exe
+   <SDK install folder>\Prepar3D v5 SDK 5.4.x.x\World\Terrain\resample.exe
    ```
 
-   For FSX, `resample.exe` is in the FSX Deluxe / Acceleration SDK (not the Steam edition SDK).
+   Older SDKs used `Environment Kit\Terrain SDK\resample.exe` instead. Search the SDK folder for `resample.exe`
+   if in doubt. For FSX, `resample.exe` is in the FSX Deluxe / Acceleration SDK (not the Steam edition SDK).
 
 2. **Tell Ortho4XP where it is.** Open `Ortho4XP.cfg` in Notepad++ or another editor that understands Unix line
-   endings (plain Notepad can corrupt the file) and set, with doubled backslashes:
+   endings (plain Notepad can corrupt the file) and set the full path:
 
    ```
-   ESP_resample_loc=C:\\Program Files\\Lockheed Martin\\Prepar3D v5 SDK 5.x.x.x\\Environment Kit\\Terrain SDK\\resample.exe
+   ESP_resample_loc=G:\Program Files\Lockheed Martin\Prepar3D v5 SDK 5.4.9.28482\World\Terrain\resample.exe
    ```
 
 3. Optional autogen with ScenProc:
