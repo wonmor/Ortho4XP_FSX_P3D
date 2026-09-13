@@ -111,6 +111,24 @@ it writes `.bgl` scenery files, you copy those into the sim, and you close Ortho
 Very large `.bgl` files (over roughly 2 GB, typical when every season is enabled at ZL 12) may fail to display in
 the sim. Enable fewer seasons or use a higher zoom level per tile if that happens.
 
+## Building the tiles along a route (route_tiles.py)
+
+Ortho4XP cannot stream imagery while you fly, so the practical routine is to build the tiles of tomorrow's flight
+tonight. `route_tiles.py` works out which 1x1 degree tiles a route crosses and can run the FSX/P3D batch build
+for them without the GUI.
+
+```
+python route_tiles.py --route KLAX KLAS                 # ICAO codes (OurAirports data, cached in tmp/)
+python route_tiles.py --simbrief YOUR_SIMBRIEF_USERNAME  # latest SimBrief flight plan, follows the navlog
+python route_tiles.py --lnmpln "path\to\plan.lnmpln"     # Little Navmap plan
+python route_tiles.py --pln "path\to\plan.pln"           # FSX / P3D plan
+```
+
+Defaults: 15 nm corridor each side of the track, ZL15 en route, ZL16 within 20 nm of origin and destination,
+provider BI. Change them with `--corridor`, `--zl`, `--airport-zl`, `--airport-radius`, `--provider`.
+Without `--build` it only prints the list and a size estimate. With `--build` it runs the same steps as the GUI's
+Batch Build with "Build For ESP (FSX/P3D)" ticked, one batch per zoom level, and needs `ESP_resample_loc` set.
+
 ## Example run (upstream video)
 
 https://www.youtube.com/watch?v=fkvmlbJXAq4
