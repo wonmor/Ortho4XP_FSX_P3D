@@ -11,9 +11,9 @@ import O4_File_Names as FNAMES
 
 overpass_servers={
         "DE":"http://overpass-api.de/api/interpreter",
-        "FR":"http://api.openstreetmap.fr/oapi/interpreter",
+        "FR":"https://overpass.openstreetmap.fr/api/interpreter",
         "KU":"https://overpass.kumi.systems/api/interpreter", 
-        "RU":"http://overpass.osm.rambler.ru/cgi/interpreter",
+        "PC":"https://overpass.private.coffee/api/interpreter",
         "MAP": "https://overpass-api.de/api/map?bbox="
         }
 overpass_server_choice="DE"
@@ -347,12 +347,18 @@ def OSM_query_to_OSM_layer(query,bbox,osm_layer,tags_of_interest=[],server_code=
 ##############################################################################
 def get_overpass_data(query,bbox,server_code=None):
     tentative=1
+    rotation=[k for k in overpass_servers if k!="MAP"]
     while True:
         s=requests.Session()
         s.headers.update({'User-Agent':'Ortho4XP/1.30 (+https://github.com/wonmor/Ortho4XP_FSX_P3D)'})
         true_server_code = server_code
         if not server_code:
-           true_server_code = random.choice(list(overpass_servers.keys())) if overpass_server_choice=='random' else overpass_server_choice
+           if overpass_server_choice=='random':
+               true_server_code = random.choice(rotation)
+           else:
+               # first try the configured server, then move on to the other mirrors on each failure
+               start = rotation.index(overpass_server_choice) if overpass_server_choice in rotation else 0
+               true_server_code = rotation[(start+tentative-1)%len(rotation)]
         base_url=overpass_servers[true_server_code]
         if isinstance(query,str):
             overpass_query=query+str(bbox)+";"
