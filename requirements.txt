@@ -1,0 +1,8 @@
+requests
+numpy
+pyproj
+shapely
+rtree
+pillow
+# gdal is optional (only for custom GeoTIFF elevation input); no Windows wheel exists
+# for Python 3.14 yet. On Python 3.12/3.13:  pip install gdal

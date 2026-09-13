@@ -1,0 +1,122 @@
+# Ortho4XP_FSX_P3D (modern Python fork)
+
+Ortho4XP is a photo-scenery generator originally written for X-Plane by Oscar Pilote.
+[stackTom's fork](https://github.com/stackTom/Ortho4XP_FSX_P3D) added FSX / Prepar3D (ESP) output.
+This repository is that fork, fixed so it runs on a current Python (tested with **Python 3.14 on Windows 11**)
+without a C++ compiler, ImageMagick, or the old Gohlke wheel site.
+
+# Use at your own risk
+
+## What changed in this fork
+
+| Problem in the original | Fix here |
+|---|---|
+| `fast_image_mask.pyd` was compiled for Python 3.6 + ImageMagick Q8 and fails to load on any modern Python (`DLL load failed`). | Replaced by `src/fast_image_mask.py`, a pure Python / numpy port of the same FSEarthTiles night, spring, autumn, winter and hard-winter colour rules. Same function names, same arguments, same 24-bit BMP output. No ImageMagick needed. A 4096x4096 tile takes about 1 to 2 seconds. |
+| Install guide pointed at `lfd.uci.edu/~gohlke` wheels, which no longer exist. | Everything installs from PyPI with `pip install -r requirements.txt`. |
+| `if ESP_resample_loc is ''` in `O4_ESP_Utils.py` was an identity comparison (SyntaxWarning, unreliable). | Changed to `==`. |
+| `Ortho4XP.cfg` shipped with the original author's personal `resample.exe` / `scenProc.exe` paths. | Both are blank so the program tells you clearly if you have not set them. |
+| `dist/` shipped a 60 MB PyInstaller exe built against the old extension. | Not included. Run from Python (see below). |
+
+The C++ sources are kept in `src/cpp/` for reference only. They are not built or used.
+
+The upstream `Providers/Global/Mapbox.lay` contained a hard-coded Mapbox access token. It is replaced by the
+placeholder `YOUR_MAPBOX_TOKEN` here; put your own token from mapbox.com in that file if you want the Mapbox provider.
+
+## Prerequisites
+
+1. Windows 64-bit (the bundled `Utils/*.exe` tools are Windows binaries).
+2. [Python 3](https://www.python.org/downloads/) with "Add python to PATH" ticked during setup. Any 3.10+ works; 3.14 is what this was tested on.
+3. 7-Zip is bundled in `Utils/`, nothing to install.
+4. **For Prepar3D / FSX output:** `resample.exe` from the sim's SDK. See "Prepar3D setup" below.
+5. Optional: [ScenProc](https://www.scenerydesign.org/development-releases/) if you want autogen (buildings, trees) generated from OpenStreetMap data.
+
+## Install
+
+Open a command prompt in this folder and run:
+
+```
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python Ortho4XP_v130.py
+```
+
+That installs `requests`, `numpy`, `pyproj`, `shapely`, `rtree` and `pillow`. Tkinter ships with the python.org installer.
+
+**GDAL is optional.** Ortho4XP only uses it to read custom GeoTIFF elevation files. The default elevation source
+(Viewfinderpanoramas `.hgt` files, downloaded automatically) does not need it. If you do need GeoTIFF input, use
+Python 3.12 or 3.13 and `pip install gdal`, which has prebuilt Windows wheels for those versions.
+
+### Linux / macOS
+
+```
+pip3 install -r requirements.txt
+python3 Ortho4XP_v130.py
+```
+
+The FSX/P3D path needs `resample.exe`, which is Windows-only. The X-Plane path works anywhere.
+
+## Prepar3D setup
+
+Ortho4XP does **not** need to run at the same time as the sim. It is an offline build tool: you run it once per tile,
+it writes `.bgl` scenery files, you copy those into the sim, and you close Ortho4XP. The sim reads the files by itself.
+
+1. **Install the Prepar3D SDK.** It is a separate download from the same Lockheed Martin download page where you got
+   Prepar3D (log in, look for "Prepar3D vX SDK"). Pick the SDK that matches your sim version. After installing, find
+   `resample.exe`, typically at:
+
+   ```
+   C:\Program Files\Lockheed Martin\Prepar3D v5 SDK <version>\Environment Kit\Terrain SDK\resample.exe
+   ```
+
+   For FSX, `resample.exe` is in the FSX Deluxe / Acceleration SDK (not the Steam edition SDK).
+
+2. **Tell Ortho4XP where it is.** Open `Ortho4XP.cfg` in Notepad++ or another editor that understands Unix line
+   endings (plain Notepad can corrupt the file) and set, with doubled backslashes:
+
+   ```
+   ESP_resample_loc=C:\\Program Files\\Lockheed Martin\\Prepar3D v5 SDK 5.x.x.x\\Environment Kit\\Terrain SDK\\resample.exe
+   ```
+
+3. Optional autogen with ScenProc:
+   - Download ScenProc (x64), extract it anywhere, run `scenProc.exe` once and point it at your sim when asked.
+   - Set `ESP_scenproc_loc=C:\\path\\to\\scenProc.exe` in `Ortho4XP.cfg`.
+   - The script used is `ScenProc_configs\default.spc` (`ESP_scenproc_script=default.spc`). You can add your own
+     scripts to that folder. Keep the `@0@` and `@1@` placeholders on the first and last lines
+     (`IMPORTOGR|@0@|...` and `EXPORTAGN|FSX|@1@`), Ortho4XP substitutes the OSM input and output paths there.
+     Credit to Harry Otter for the default script.
+
+4. Seasons and night textures are controlled by these `Ortho4XP.cfg` keys and are generated by the numpy port at
+   resample time: `create_ESP_night`, `create_ESP_summer`, `create_ESP_spring`, `create_ESP_fall`,
+   `create_ESP_winter`, `create_ESP_hard_winter`. Each enabled season multiplies the size of the resulting `.bgl`.
+
+## Building a tile and putting it in Prepar3D
+
+1. Run `python Ortho4XP_v130.py`.
+2. Pick the tile (latitude / longitude of its south-west corner), imagery provider and zoom level, then build.
+3. When it finishes, the FSX/P3D output is in:
+
+   ```
+   Orthophotos\<lat band>\<tile>\<provider>_<ZL>\ADDON_SCENERY
+   ```
+
+   for example `Orthophotos\+40+000\+45-073\BI_16\ADDON_SCENERY`.
+
+4. Rename `ADDON_SCENERY` to something meaningful (for example `Ortho_45N073W`) and move it into your sim's
+   `Addon Scenery` folder, for example `G:\Program Files\Lockheed Martin\Prepar3D v5\Addon Scenery\`. Any folder works,
+   it just has to contain the `scenery` and `texture` sub-folders that Ortho4XP produced.
+5. Start Prepar3D, open **Options > Scenery Library > Add Area**, select that folder and click OK. Prepar3D re-indexes
+   the scenery and the photo ground appears on the next flight load.
+
+Very large `.bgl` files (over roughly 2 GB, typical when every season is enabled at ZL 12) may fail to display in
+the sim. Enable fewer seasons or use a higher zoom level per tile if that happens.
+
+## Example run (upstream video)
+
+https://www.youtube.com/watch?v=fkvmlbJXAq4
+
+## Credits and licence
+
+- Ortho4XP by Oscar Pilote, GPL (see `LICENSE` and `Licence/`).
+- FSX / P3D support by [stackTom](https://github.com/stackTom/Ortho4XP_FSX_P3D), including the FSEarthTiles
+  season algorithms this fork re-implements in Python.
+- Default ScenProc script by Harry Otter.
