@@ -21,6 +21,9 @@ try:
         iter(shapely.geometry.MultiPoint([(0, 0)]))
     except TypeError:
         BaseMultipartGeometry.__iter__ = lambda self: iter(self.geoms)
+    if not hasattr(BaseMultipartGeometry, "__len__"):
+        # __len__ alone is safe: numpy only treats objects with __getitem__ as sequences
+        BaseMultipartGeometry.__len__ = lambda self: len(self.geoms)
     if not hasattr(BaseGeometry, 'type'):
         BaseGeometry.type = property(lambda self: self.geom_type)
     if not hasattr(shapely.ops, 'cascaded_union'):

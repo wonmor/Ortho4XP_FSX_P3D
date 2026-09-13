@@ -225,10 +225,10 @@ class Vector_Map():
         UI.progress_bar(1,0)
         if isinstance(multipol,dict):
             iterloop=multipol.values()
-            todo=len(multipol.geoms)
+            todo=len(multipol)
         else:
             iterloop=ensure_MultiPolygon(multipol)
-            todo=len(iterloop)
+            todo=len(iterloop.geoms)
         step=int(todo/100)+1
         done=0
         for pol in iterloop:
