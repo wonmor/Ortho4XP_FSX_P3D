@@ -1,5 +1,6 @@
 import os
 import sys
+import O4_Compat  # library compatibility shims, must be first
 from math import floor
 
 g2xpl_16_prefix=''
