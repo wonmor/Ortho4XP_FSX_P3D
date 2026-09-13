@@ -323,11 +323,14 @@ def main():
         kept = []
         for lat, lon, zl in plan:
             band = "%+03d%+04d" % ((lat // 10) * 10, (lon // 10) * 10)
-            out_dir = os.path.join(here, "Orthophotos", band, tile_name(lat, lon),
-                                   "%s_%d" % (args.provider, zl), "ADDON_SCENERY", "scenery")
-            if glob.glob(os.path.join(out_dir, "*.bgl")):
-                print("skipping %s ZL%d, already built" % (tile_name(lat, lon), zl))
+            tile_dir = os.path.join(here, "Orthophotos", band, tile_name(lat, lon), "%s_%d" % (args.provider, zl))
+            n_inf = len(glob.glob(os.path.join(tile_dir, "*.inf")))
+            n_bgl = len(glob.glob(os.path.join(tile_dir, "ADDON_SCENERY", "scenery", "*.bgl")))
+            if n_inf and n_bgl >= n_inf:
+                print("skipping %s ZL%d, already built (%d BGL)" % (tile_name(lat, lon), zl, n_bgl))
             else:
+                if n_bgl:
+                    print("rebuilding %s ZL%d, only %d of %d textures resampled" % (tile_name(lat, lon), zl, n_bgl, n_inf))
                 kept.append((lat, lon, zl))
         plan = kept
         if not plan:
