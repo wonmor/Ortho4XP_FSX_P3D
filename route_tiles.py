@@ -288,6 +288,8 @@ def main():
     ap.add_argument("--provider", default="BI", help="imagery provider code (default BI = Bing)")
     ap.add_argument("--build", action="store_true", help="run the Ortho4XP FSX/P3D batch build for these tiles")
     ap.add_argument("--out", metavar="FILE", help="also write the tile list to this file")
+    ap.add_argument("--skip-done", action="store_true",
+                    help="leave out tiles that already have BGL output for this provider and zoom level")
     args = ap.parse_args()
 
     here = os.path.dirname(os.path.abspath(__file__))
@@ -315,6 +317,22 @@ def main():
     for (lat, lon) in sorted(route_tiles | apt_tiles):
         zl = args.airport_zl if (lat, lon) in apt_tiles else args.zl
         plan.append((lat, lon, zl))
+
+    if args.skip_done:
+        import glob
+        kept = []
+        for lat, lon, zl in plan:
+            band = "%+03d%+04d" % ((lat // 10) * 10, (lon // 10) * 10)
+            out_dir = os.path.join(here, "Orthophotos", band, tile_name(lat, lon),
+                                   "%s_%d" % (args.provider, zl), "ADDON_SCENERY", "scenery")
+            if glob.glob(os.path.join(out_dir, "*.bgl")):
+                print("skipping %s ZL%d, already built" % (tile_name(lat, lon), zl))
+            else:
+                kept.append((lat, lon, zl))
+        plan = kept
+        if not plan:
+            print("Nothing left to build.")
+            return 0
 
     est = sum(SIZE_GB.get(zl, 4.0) for _, _, zl in plan)
     print("Route %s: %d waypoints, %.0f nm, corridor %.0f nm" % (label, len(points), total_nm, args.corridor))
