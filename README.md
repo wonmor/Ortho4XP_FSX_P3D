@@ -129,6 +129,25 @@ provider BI. Change them with `--corridor`, `--zl`, `--airport-zl`, `--airport-r
 Without `--build` it only prints the list and a size estimate. With `--build` it runs the same steps as the GUI's
 Batch Build with "Build For ESP (FSX/P3D)" ticked, one batch per zoom level, and needs `ESP_resample_loc` set.
 
+Two more flags make the per-flight routine painless:
+
+- `--skip-done` leaves out tiles whose every texture already has a BGL, so a rerun after an interruption only
+  builds what is missing.
+- `--p3d-addon NAME` writes `Documents\Prepar3D vX Add-ons\NAME\add-on.xml` pointing at every built tile of the
+  route. Prepar3D discovers it on next start and asks once whether to activate it. Nothing is copied, the BGLs stay in
+  the Ortho4XP folder, and you never touch the Scenery Library dialog. Rerun it with the same NAME after building more
+  tiles and the file is rewritten to include them.
+
+A typical evening therefore looks like:
+
+```
+python route_tiles.py --simbrief YOUR_NAME --skip-done --build --p3d-addon Ortho4XP_Route
+```
+
+Budget roughly one hour and 4 to 5 GB per land tile at ZL16 with 4 resample workers, a quarter of that at ZL15.
+Set `max_resample_processes` in Ortho4XP.cfg to about a fifth of your RAM in GB (each worker peaks near 1 GB) and
+keep memory-hungry programs such as MSFS closed while it runs; the build dies with allocation errors otherwise.
+
 ## Example run (upstream video)
 
 https://www.youtube.com/watch?v=fkvmlbJXAq4
